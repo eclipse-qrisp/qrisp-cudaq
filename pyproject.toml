@@ -33,7 +33,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev-code-style = [
-    "ruff==0.16.5",
+    "ruff==0.16.10",
 ]
 dev-testing = [
     "pytest==9.1.1",
