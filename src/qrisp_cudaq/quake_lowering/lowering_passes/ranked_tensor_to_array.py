@@ -67,7 +67,7 @@ from xdsl.pattern_rewriter import (
     op_type_rewrite_pattern,
 )
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.cc_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.cc_dialect import (
     CcAllocaOp,
     CcArrayType,
     CcCastOp,
@@ -78,14 +78,14 @@ from qrisp.jasp.cudaq_interface.quake_lowering.dialects.cc_dialect import (
     CcPtrType,
     CcStoreOp,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.ir_helpers import (
+from qrisp_cudaq.quake_lowering.lowering_passes.ir_helpers import (
     _MLIR_DYNAMIC,
     _dense_values,
     _is_array_pointer,
     _is_rank_1_tensor,
     _scalar_attr,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.safeguard_no_ranked_tensor_linalg import (
+from qrisp_cudaq.quake_lowering.lowering_passes.safeguard_no_ranked_tensor_linalg import (
     CudaqUnsupportedArrayOperationError,
 )
 

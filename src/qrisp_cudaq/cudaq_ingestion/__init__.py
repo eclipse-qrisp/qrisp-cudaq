@@ -20,7 +20,7 @@
 # callable CUDA-Q kernel.
 # =========================================================================
 #
-# This package picks up where qrisp.jasp.cudaq_interface.quake_lowering
+# This package picks up where qrisp_cudaq.quake_lowering
 # leaves off. While quake_lowering is responsible for producing a valid
 # Quake/CC xDSL module from a Jasp representation, this package handles the
 # CUDA-Q-runtime-specific packaging required to actually execute that module,
@@ -38,6 +38,6 @@
 #     CUDA-Q, attach the host's LLVM data layout, and wrap the result in a
 #     native PyKernelDecorator via cudaq_kernel_from_xdsl_module.
 
-from qrisp.jasp.cudaq_interface.cudaq_ingestion.xdsl_ingestion import (
+from qrisp_cudaq.cudaq_ingestion.xdsl_ingestion import (
     _cudaq_kernel_from_xdsl_module,
 )

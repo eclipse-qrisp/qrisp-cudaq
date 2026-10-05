@@ -42,7 +42,7 @@ from qrisp import (
 )
 from qrisp.alg_primitives import amplitude_amplification, q_switch, QAE, QPE, QFT, IQPE
 from qrisp.jasp import jrange
-from qrisp.jasp.cudaq_interface import cudaq_kernel
+from qrisp_cudaq import cudaq_kernel
 from qrisp.operators import X, Y, Z
 
 # ---------------------------------------------------------------------------

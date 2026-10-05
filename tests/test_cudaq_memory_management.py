@@ -20,7 +20,7 @@ import pytest
 import cudaq
 
 from qrisp import QuantumFloat, x, reset, measure
-from qrisp.jasp.cudaq_interface import cudaq_kernel
+from qrisp_cudaq import cudaq_kernel
 
 
 @pytest.mark.timeout(30)

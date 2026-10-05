@@ -42,14 +42,14 @@ from xdsl.pattern_rewriter import (
 )
 from xdsl.rewriter import InsertPoint, Rewriter
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.cc_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.cc_dialect import (
     CcArrayType,
     CcCastOp,
     CcPtrType,
     CcSequenceDataOp,
     CcSequenceType,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.ir_helpers import (
+from qrisp_cudaq.quake_lowering.lowering_passes.ir_helpers import (
     _MLIR_DYNAMIC,
     _is_array_pointer,
 )

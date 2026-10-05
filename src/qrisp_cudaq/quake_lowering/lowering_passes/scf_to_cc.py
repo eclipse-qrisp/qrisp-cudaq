@@ -52,13 +52,13 @@ from xdsl.pattern_rewriter import (
 )
 from xdsl.rewriter import InsertPoint, Rewriter
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.cc_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.cc_dialect import (
     CcConditionOp,
     CcContinueOp,
     CcIfOp,
     CcLoopOp,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.ir_helpers import _is_scalar_tensor
+from qrisp_cudaq.quake_lowering.lowering_passes.ir_helpers import _is_scalar_tensor
 
 # ===================================================================
 # Public entry point

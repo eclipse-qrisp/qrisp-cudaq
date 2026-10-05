@@ -16,6 +16,12 @@
 
 """Provide helper functions for Jasp-to-Quake lowering."""
 
+from qrisp.jasp.mlir.xdsl_dialect import (
+    QuantumGateOp,
+    QuantumStateType,
+    QubitArrayType,
+    QubitType,
+)
 from xdsl.dialects import arith, func, tensor
 from xdsl.dialects.builtin import (
     DenseIntOrFPElementsAttr,
@@ -35,20 +41,14 @@ from xdsl.pattern_rewriter import (
 from xdsl.rewriter import InsertPoint
 from xdsl.traits import Pure
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.quake_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.quake_dialect import (
     QuakeRefType,
     QuakeVeqType,
     VeqSizeOp,
     _make_gate_op,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.ir_helpers import _is_float_type, _is_scalar_tensor
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.gate_mapping import GateInfo
-from qrisp.jasp.mlir.xdsl_dialect import (
-    QuantumGateOp,
-    QuantumStateType,
-    QubitArrayType,
-    QubitType,
-)
+from qrisp_cudaq.quake_lowering.lowering_passes.ir_helpers import _is_float_type, _is_scalar_tensor
+from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.gate_mapping import GateInfo
 
 # ---------------------------------------------------------------------------
 # Helpers to identify Jasp types

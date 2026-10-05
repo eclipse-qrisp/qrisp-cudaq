@@ -75,9 +75,9 @@ from qrisp.jasp import (
 )
 from xdsl.dialects.func import FuncOp
 
-from qrisp.jasp.cudaq_interface.quake_lowering.jaspr_to_quake import _jaspr_to_quake_mlir
-from qrisp.jasp.cudaq_interface.quake_lowering.validation_tools import _validate_quake_mlir
-from qrisp.jasp.cudaq_interface import cudaq_kernel
+from qrisp_cudaq.quake_lowering.jaspr_to_quake import to_quake_mlir
+from qrisp_cudaq.quake_lowering.validation_tools import _validate_quake_mlir
+from qrisp_cudaq import cudaq_kernel
 
 
 # ---------------------------------------------------------------------------
@@ -94,7 +94,7 @@ def _lower(circuit_fn, *trace_args):
     jaspr = make_jaspr(circuit_fn)(*trace_args)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        xdsl_module = _jaspr_to_quake_mlir(jaspr)
+        xdsl_module = to_quake_mlir(jaspr)
     return xdsl_module
 
 
@@ -501,7 +501,7 @@ def test_bell_circuit_full_format():
 
 def test_gate_mapping_standard_gates():
     """Verify that all standard gates are in the gate map."""
-    from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.gate_mapping import (
+    from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.gate_mapping import (
         _get_gate_info,
         GATE_MAP,
     )
@@ -855,7 +855,7 @@ def test_measure_returned_lowers_in_sample_mode():
     jaspr = make_jaspr(circuit)()
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        mlir = str(jaspr.to_quake_mlir(execution_mode="sample"))
+        mlir = str(to_quake_mlir(jaspr, execution_mode="sample"))
 
     assert "quake.mz" in mlir, "Expected quake.mz in output"
     assert "quake.discriminate" not in mlir, "sample mode must not discriminate"
@@ -878,7 +878,7 @@ def test_measure_feeding_classical_control_raises_in_sample_mode():
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
         with pytest.raises(NotImplementedError, match="execution_mode='sample'"):
-            jaspr.to_quake_mlir(execution_mode="sample")
+            to_quake_mlir(jaspr, execution_mode="sample")
 
 
 # ---------------------------------------------------------------------------
@@ -1229,7 +1229,7 @@ def test_unsupported_gate_raises_not_implemented_error():
         return qv
 
     with patch(
-        "qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.lower_jasp_to_quake._get_gate_info",
+        "qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.lower_jasp_to_quake._get_gate_info",
         return_value=None,
     ):
         with pytest.raises(NotImplementedError, match=r"uses the gate 'h'"):
@@ -1237,12 +1237,12 @@ def test_unsupported_gate_raises_not_implemented_error():
 
 
 # ---------------------------------------------------------------------------
-# Public entry point: Jaspr.to_quake_mlir
+# Public entry point: to_quake_mlir
 # ---------------------------------------------------------------------------
 
 
 def _example_circuit(i):
-    """The circuit used by the ``Jaspr.to_quake_mlir`` docstring example."""
+    """The circuit used by the ``to_quake_mlir`` docstring example."""
     qv = QuantumFloat(i)
     cx(qv[0], qv[1])
     t(qv[1])
@@ -1252,12 +1252,12 @@ def _example_circuit(i):
 
 
 def test_to_quake_mlir_lowers_via_public_method():
-    """Test that Jaspr.to_quake_mlir correctly lowers a circuit."""
+    """Test that to_quake_mlir correctly lowers a circuit."""
     jaspr = make_jaspr(_example_circuit)(2)
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        xdsl_module = jaspr.to_quake_mlir()
+        xdsl_module = to_quake_mlir(jaspr)
 
     mlir = str(xdsl_module)
     assert "func.func" in mlir
@@ -1273,7 +1273,7 @@ def test_to_quake_mlir_execution_mode_changes_output():
 
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        run_mlir = str(jaspr.to_quake_mlir(execution_mode="run"))
-        sample_mlir = str(jaspr.to_quake_mlir(execution_mode="sample"))
+        run_mlir = str(to_quake_mlir(jaspr, execution_mode="run"))
+        sample_mlir = str(to_quake_mlir(jaspr, execution_mode="sample"))
 
     assert run_mlir != sample_mlir

@@ -19,7 +19,7 @@
 # CUDA-Q module preparation.
 # ==========================
 #
-# Transforms a Quake+CC xDSL module (output of _jaspr_to_quake_mlir) into the structure
+# Transforms a Quake+CC xDSL module (output of to_quake_mlir) into the structure
 # that CUDA-Q's Module.parse expects:
 #
 # - Strips module sym_name (anonymous module)
@@ -44,12 +44,12 @@ from xdsl.dialects.builtin import (
 )
 from xdsl.ir import Attribute, Block, Region
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.cc_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.cc_dialect import (
     CcInsertValueOp,
     CcStructType,
     CcUndefOp,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.quake_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.quake_dialect import (
     QuakeLogOutputOp,
     QuakeMeasureType,
     QuakeRefType,

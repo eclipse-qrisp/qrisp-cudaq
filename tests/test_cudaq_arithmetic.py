@@ -26,7 +26,7 @@ from qrisp import (
     QuantumModulus,
     measure,
 )
-from qrisp.jasp.cudaq_interface import cudaq_kernel
+from qrisp_cudaq import cudaq_kernel
 
 _SHOTS_COUNT = 1
 

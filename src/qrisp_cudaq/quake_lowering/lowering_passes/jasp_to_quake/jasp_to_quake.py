@@ -16,10 +16,10 @@
 
 """Run the complete Jasp-to-Quake lowering pipeline."""
 
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.lower_jasp_to_quake import (
+from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.lower_jasp_to_quake import (
     _lower_jasp_to_quake,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.strip_qst import _strip_qst
+from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.strip_qst import _strip_qst
 
 
 def _jasp_to_quake(module, execution_mode="run"):

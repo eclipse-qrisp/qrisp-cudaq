@@ -47,6 +47,10 @@
 # - func.return operands
 # - func.func argument lists, return types, and attributes
 
+from qrisp.jasp.mlir.xdsl_dialect import (
+    ConsumeQuantumKernelOp,
+    CreateQuantumKernelOp,
+)
 from xdsl.dialects import arith, func
 from xdsl.dialects.builtin import (
     DenseIntOrFPElementsAttr,
@@ -71,19 +75,15 @@ from xdsl.pattern_rewriter import (
 )
 from xdsl.rewriter import Rewriter
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.quake_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.quake_dialect import (
     QuakeRefType,
     QuakeVeqType,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.helper_functions import (
+from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.helper_functions import (
     _is_qst,
     _is_qubit,
     _is_qubit_array,
     _quake_type_for,
-)
-from qrisp.jasp.mlir.xdsl_dialect import (
-    ConsumeQuantumKernelOp,
-    CreateQuantumKernelOp,
 )
 
 # ===========================================================================

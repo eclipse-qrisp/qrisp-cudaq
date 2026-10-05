@@ -29,7 +29,7 @@ import jax.numpy as jnp
 
 from qrisp import QuantumVariable, jrange, measure, rz
 from qrisp.jasp import make_jaspr, qache
-from qrisp.jasp.cudaq_interface.quake_lowering.jaspr_to_quake import _jaspr_to_quake_mlir
+from qrisp_cudaq.quake_lowering.jaspr_to_quake import to_quake_mlir
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -38,7 +38,7 @@ from qrisp.jasp.cudaq_interface.quake_lowering.jaspr_to_quake import _jaspr_to_q
 
 def _lower(func, *args) -> str:
     """Lower *func* through the Quake pipeline and return the MLIR text."""
-    return str(_jaspr_to_quake_mlir(make_jaspr(func)(*args), execution_mode="run"))
+    return str(to_quake_mlir(make_jaspr(func)(*args), execution_mode="run"))
 
 
 def _assert_no_tensors(mlir: str) -> None:

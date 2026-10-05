@@ -51,7 +51,7 @@ from xdsl.pattern_rewriter import (
     op_type_rewrite_pattern,
 )
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.quake_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.quake_dialect import (
     AllocaOp,
     ConcatOp,
     DeallocOp,

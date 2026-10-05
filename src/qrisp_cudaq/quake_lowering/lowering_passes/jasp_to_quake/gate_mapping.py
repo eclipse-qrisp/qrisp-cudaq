@@ -46,7 +46,7 @@ from xdsl.dialects import arith
 from xdsl.dialects.builtin import FloatAttr, f64
 from xdsl.ir import Operation, SSAValue
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.quake_dialect import _make_gate_op
+from qrisp_cudaq.quake_lowering.dialects.quake_dialect import _make_gate_op
 
 
 @dataclass(frozen=True)

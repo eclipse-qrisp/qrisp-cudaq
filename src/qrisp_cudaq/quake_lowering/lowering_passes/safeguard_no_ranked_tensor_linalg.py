@@ -26,7 +26,7 @@
 from xdsl.dialects import linalg
 from xdsl.dialects.builtin import ModuleOp
 
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.ir_helpers import _is_ranked_tensor
+from qrisp_cudaq.quake_lowering.lowering_passes.ir_helpers import _is_ranked_tensor
 
 
 class CudaqUnsupportedArrayOperationError(RuntimeError):

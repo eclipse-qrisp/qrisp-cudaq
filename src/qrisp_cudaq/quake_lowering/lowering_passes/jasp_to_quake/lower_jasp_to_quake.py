@@ -40,6 +40,22 @@
 # jasp.create_quantum_kernel        dropped in strip_qst
 # jasp.consume_quantum_kernel       dropped in strip_qst
 
+from qrisp.jasp.mlir.xdsl_dialect import (
+    CreateQubitsOp,
+    DeleteQubitsOp,
+    FuseOp,
+    GetQubitOp,
+    GetSizeOp,
+    ParityOp,
+    QuantumGateOp,
+    SliceOp,
+)
+from qrisp.jasp.mlir.xdsl_dialect import (
+    MeasureOp as JaspMeasureOp,
+)
+from qrisp.jasp.mlir.xdsl_dialect import (
+    ResetOp as JaspResetOp,
+)
 from xdsl.dialects import arith, scf
 from xdsl.dialects.builtin import (
     DenseIntOrFPElementsAttr,
@@ -61,7 +77,7 @@ from xdsl.pattern_rewriter import (
 )
 from xdsl.rewriter import InsertPoint
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.quake_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.quake_dialect import (
     AllocaOp,
     ConcatOp,
     DeallocOp,
@@ -73,8 +89,8 @@ from qrisp.jasp.cudaq_interface.quake_lowering.dialects.quake_dialect import (
     SubVeqOp,
     VeqSizeOp,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.gate_mapping import _get_gate_info
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.helper_functions import (
+from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.gate_mapping import _get_gate_info
+from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.helper_functions import (
     _classify_gate_operands,
     _emit_gate,
     _extract_scalar_for_rewriter,
@@ -86,22 +102,6 @@ from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.hel
     _normalize_slice_bounds_for_veq_rewriter,
     _split_gate_operands,
     _wrap_scalar_for_rewriter,
-)
-from qrisp.jasp.mlir.xdsl_dialect import (
-    CreateQubitsOp,
-    DeleteQubitsOp,
-    FuseOp,
-    GetQubitOp,
-    GetSizeOp,
-    ParityOp,
-    QuantumGateOp,
-    SliceOp,
-)
-from qrisp.jasp.mlir.xdsl_dialect import (
-    MeasureOp as JaspMeasureOp,
-)
-from qrisp.jasp.mlir.xdsl_dialect import (
-    ResetOp as JaspResetOp,
 )
 
 # ===========================================================================

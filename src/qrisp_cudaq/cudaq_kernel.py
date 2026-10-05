@@ -55,12 +55,12 @@ from collections.abc import Callable
 from typing import Literal
 
 from cudaq.kernel.kernel_decorator import PyKernelDecorator
-
-from qrisp.jasp.cudaq_interface.annotations import FixedShapeNDArray
-from qrisp.jasp.cudaq_interface.cudaq_ingestion import _cudaq_kernel_from_xdsl_module
-from qrisp.jasp.cudaq_interface.quake_lowering.jaspr_to_quake import _jaspr_to_quake_mlir
 from qrisp.jasp.interpreter_tools import jaspr_to_static_register_jaspr
 from qrisp.jasp.jasp_expression import make_jaspr
+
+from qrisp_cudaq.annotations import FixedShapeNDArray
+from qrisp_cudaq.cudaq_ingestion import _cudaq_kernel_from_xdsl_module
+from qrisp_cudaq.quake_lowering.jaspr_to_quake import to_quake_mlir
 
 # ------------------------------------------------------------------ #
 # @cudaq_kernel decorator
@@ -139,7 +139,7 @@ def cudaq_kernel(
 
         import cudaq
         from qrisp import QuantumVariable, cx, h, measure
-        from qrisp import cudaq_kernel
+        from qrisp_cudaq import cudaq_kernel
 
         @cudaq_kernel
         def bell():
@@ -155,7 +155,7 @@ def cudaq_kernel(
 
         import cudaq
         from qrisp import QuantumFloat, h, measure
-        from qrisp import cudaq_kernel
+        from qrisp_cudaq import cudaq_kernel
 
         @cudaq_kernel
         def main():
@@ -174,7 +174,7 @@ def cudaq_kernel(
         import cudaq
         import numpy as np
         from qrisp import QuantumFloat, h, ry, measure
-        from qrisp import cudaq_kernel, FixedShapeNDArray
+        from qrisp_cudaq import cudaq_kernel, FixedShapeNDArray
 
         @cudaq_kernel
         def circuit(k: int):
@@ -200,7 +200,7 @@ def cudaq_kernel(
 
         import cudaq
         from qrisp import QuantumVariable, cx, h, measure
-        from qrisp import cudaq_kernel
+        from qrisp_cudaq import cudaq_kernel
 
         @cudaq_kernel(execution_mode="sample")
         def bell():
@@ -252,7 +252,7 @@ def cudaq_kernel(
         new_jaspr = jaspr
 
     try:
-        mlir_module = _jaspr_to_quake_mlir(new_jaspr, execution_mode=execution_mode)
+        mlir_module = to_quake_mlir(new_jaspr, execution_mode=execution_mode)
     except Exception as e:
         raise RuntimeError(f"Failed to compile Qrisp function '{func.__name__}' to CUDA-Q: {e}") from e
 

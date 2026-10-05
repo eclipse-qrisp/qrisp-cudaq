@@ -14,20 +14,13 @@
 # * SPDX-License-Identifier: EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0
 # ********************************************************************************
 
-"""Provide the CUDA-Q backend interface for Qrisp Jasp programs."""
+"""Test the public API of qrisp_cudaq."""
 
-# qrisp_cudaq — CUDA-Q backend for Qrisp/Jasp.
-# =============================================
-#
-# Provides the CUDA-Q execution tools for Qrisp functions compiled via
-# Jasp/Quake MLIR.
+import qrisp_cudaq
 
-from qrisp_cudaq.annotations import FixedShapeNDArray
-from qrisp_cudaq.cudaq_kernel import cudaq_kernel
-from qrisp_cudaq.quake_lowering import to_quake_mlir
 
-__all__ = [
-    "cudaq_kernel",
-    "FixedShapeNDArray",
-    "to_quake_mlir",
-]
+def test_public_names():
+    """The package exports exactly the documented names."""
+    assert sorted(qrisp_cudaq.__all__) == ["FixedShapeNDArray", "cudaq_kernel", "to_quake_mlir"]
+    for name in qrisp_cudaq.__all__:
+        assert hasattr(qrisp_cudaq, name)

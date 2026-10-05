@@ -27,7 +27,7 @@ from qrisp import (
     measure,
 )
 from qrisp.jasp import qache
-from qrisp.jasp.cudaq_interface import cudaq_kernel
+from qrisp_cudaq import cudaq_kernel
 
 # ---------------------------------------------------------------------------
 # Test arrays

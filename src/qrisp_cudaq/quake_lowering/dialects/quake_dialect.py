@@ -52,7 +52,7 @@ from xdsl.irdl import (
 )
 from xdsl.printer import Printer
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.cc_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.cc_dialect import (
     CcMeasureHandleType,
     CcSequenceType,
 )
@@ -454,7 +454,7 @@ def _make_gate_op(
         A new Quake gate op instance, or *None* if the gate is not supported.
 
     """
-    from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.gate_mapping import GATE_MAP
+    from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.gate_mapping import GATE_MAP
 
     gate_info = GATE_MAP.get(gate_name)
     if gate_info is None:

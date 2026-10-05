@@ -43,42 +43,43 @@
 # The returned ModuleOp contains only the dialects and operations supported by
 # the CUDA-Q ingestion layer; no !jasp.* types or tensor operations remain.
 
+from qrisp.jasp.jasp_expression import Jaspr
+from qrisp.jasp.mlir.mlir_emission import jaspr_to_mlir
 from xdsl.dialects.builtin import ModuleOp
 
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.array_to_sequence import (
+from qrisp_cudaq.quake_lowering.lowering_passes.array_to_sequence import (
     _lower_array_to_sequence,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.jasp_to_quake.jasp_to_quake import (
+from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.jasp_to_quake import (
     _jasp_to_quake,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.ranked_tensor_to_array import (
+from qrisp_cudaq.quake_lowering.lowering_passes.ranked_tensor_to_array import (
     _lower_ranked_tensors,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.safeguard_no_ranked_tensor_linalg import (
+from qrisp_cudaq.quake_lowering.lowering_passes.safeguard_no_ranked_tensor_linalg import (
     _verify_no_ranked_tensor_linalg,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.scalar_tensor_unwrap import (
+from qrisp_cudaq.quake_lowering.lowering_passes.scalar_tensor_unwrap import (
     _unwrap_scalar_tensors,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.scf_to_cc import _lower_scf_to_cc
-from qrisp.jasp.cudaq_interface.quake_lowering.lowering_passes.static_veq_alloca import (
+from qrisp_cudaq.quake_lowering.lowering_passes.scf_to_cc import _lower_scf_to_cc
+from qrisp_cudaq.quake_lowering.lowering_passes.static_veq_alloca import (
     _staticize_veq_alloca,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.pass_manager import (
+from qrisp_cudaq.quake_lowering.pass_manager import (
     _LoweringPass,
     _run_pass_pipeline,
 )
-from qrisp.jasp.jasp_expression import Jaspr
-from qrisp.jasp.mlir.mlir_emission import jaspr_to_mlir
 
 
-def _jaspr_to_quake_mlir(jaspr: Jaspr, execution_mode: str = "run") -> ModuleOp:
-    """Lower a :class:`~qrisp.jasp.Jaspr` to a Quake+CC ``builtin.ModuleOp``.
+def to_quake_mlir(jaspr: Jaspr, execution_mode: str = "run") -> ModuleOp:
+    """
+    Compiles a Jaspr to MLIR using the `Quake dialect <https://nvidia.github.io/cuda-quantum/latest/specification/quake-dialect.html>`__.
 
     Parameters
     ----------
     jaspr : Jaspr
-        A :class:`~qrisp.jasp.Jaspr` (closed-form JAX trace) to lower.
+        The Jaspr to compile.
     execution_mode : {"run", "sample"}, default "run"
         Controls how quantum measurements are lowered and how the function
         signature is generated.  Two values are accepted:
@@ -88,7 +89,7 @@ def _jaspr_to_quake_mlir(jaspr: Jaspr, execution_mode: str = "run") -> ModuleOp:
             ``cc.loop`` that extracts each qubit, calls ``quake.mz`` +
             ``quake.discriminate``, and packs the resulting bits into an
             ``i64`` accumulator.  Single-qubit measurements are lowered to
-            ``quake.mz`` + ``quake.discriminate`` returning ``tensor<i1>``.
+            ``quake.mz`` + ``quake.discriminate`` returning ``i1``.
             Classical return values are preserved in the function signature.
 
         ``"sample"``
@@ -109,13 +110,78 @@ def _jaspr_to_quake_mlir(jaspr: Jaspr, execution_mode: str = "run") -> ModuleOp:
     xdsl.dialects.builtin.ModuleOp
         An xDSL module representing the quantum computation in Quake and CC dialects.
 
-    Raises
-    ------
-    CudaqUnsupportedArrayOperationError
-        If the emitted module contains an unsupported array operation.
-    NotImplementedError
-        If ``execution_mode="sample"`` and a measurement result is used
-        classically inside the kernel.
+    Examples
+    --------
+    We create a simple script and inspect the MLIR string:
+
+    ::
+
+        from qrisp import QuantumFloat, cx, t, measure
+        from qrisp.jasp import make_jaspr
+        from qrisp_cudaq import to_quake_mlir
+
+        def example_function(i):
+
+            qv = QuantumFloat(i)
+            cx(qv[0], qv[1])
+            t(qv[1])
+            meas_res = measure(qv)
+            meas_res += 1
+            return meas_res
+
+        jaspr = make_jaspr(example_function)(2)
+        xdsl_module = to_quake_mlir(jaspr)
+        print(xdsl_module)
+
+    .. code-block:: none
+
+        builtin.module @jasp_module {
+          func.func public @main(%0: i64) -> (f64) attributes {"cudaq-entrypoint", "cudaq-kernel"} {
+            %1 = quake.alloca !quake.veq<?>[%0 : i64]
+            %2 = arith.constant 0 : i64
+            %3 = quake.veq_size %1 : (!quake.veq<?>) -> i64
+            %4 = arith.constant 0 : i64
+            %5 = arith.cmpi slt, %2, %4 : i64
+            %6 = arith.addi %2, %3 : i64
+            %7 = arith.select %5, %6, %2 : i64
+            %8 = quake.extract_ref %1[%7] : (!quake.veq<?>, i64) -> !quake.ref
+            %9 = arith.constant 1 : i64
+            %10 = quake.veq_size %1 : (!quake.veq<?>) -> i64
+            %11 = arith.constant 0 : i64
+            %12 = arith.cmpi slt, %9, %11 : i64
+            %13 = arith.addi %9, %10 : i64
+            %14 = arith.select %12, %13, %9 : i64
+            %15 = quake.extract_ref %1[%14] : (!quake.veq<?>, i64) -> !quake.ref
+            quake.x [%8] %15 : (!quake.ref, !quake.ref) -> ()
+            quake.t %15 : (!quake.ref) -> ()
+            %16 = quake.veq_size %1 : (!quake.veq<?>) -> i64
+            %17 = arith.constant 0 : i64
+            %18 = arith.constant 1 : i64
+            %19, %20 = cc.loop while ((%21 = %17, %22 = %17) -> (i64, i64)) {
+            %23 = arith.cmpi slt, %21, %16 : i64
+            cc.condition %23(%21, %22 : i64, i64)
+            } do {
+            ^bb0(%24: i64, %25: i64):
+            %26 = quake.extract_ref %1[%24] : (!quake.veq<?>, i64) -> !quake.ref
+            %27 = quake.mz %26 : (!quake.ref) -> !quake.measure
+            %28 = quake.discriminate %27 : (!quake.measure) -> i1
+            %29 = arith.extui %28 : i1 to i64
+            %30 = arith.shli %29, %24 : i64
+            %31 = arith.ori %25, %30 : i64
+            cc.continue %24, %31 : i64, i64
+            } step {
+            ^bb1(%32: i64, %33: i64):
+            %34 = arith.addi %32, %18 : i64
+            cc.continue %34, %33 : i64, i64
+            }
+            %35 = arith.sitofp %20 : i64 to f64
+            %36 = arith.constant 1.000000e+00 : f64
+            %37 = arith.mulf %35, %36 : f64
+            %38 = arith.constant 1.000000e+00 : f64
+            %39 = arith.addf %37, %38 : f64
+            func.return %39 : f64
+          }
+        }
 
     """
     if execution_mode not in ("run", "sample"):

@@ -71,7 +71,7 @@ from qrisp import (
     y,
     z,
 )
-from qrisp.jasp.cudaq_interface import cudaq_kernel
+from qrisp_cudaq import cudaq_kernel
 
 # ---------------------------------------------------------------------------
 # Shared helpers

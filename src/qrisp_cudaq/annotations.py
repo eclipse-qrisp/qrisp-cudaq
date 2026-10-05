@@ -47,7 +47,7 @@ class FixedShapeNDArray:
         import cudaq
         import numpy as np
         from qrisp import *
-        from qrisp.jasp.cudaq_interface import cudaq_kernel, FixedShapeNDArray
+        from qrisp_cudaq import cudaq_kernel, FixedShapeNDArray
 
         @cudaq_kernel
         def circuit(angles: FixedShapeNDArray[float, 3]):

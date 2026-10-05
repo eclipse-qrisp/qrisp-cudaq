@@ -23,11 +23,11 @@ from xdsl.dialects import func as xfunc
 
 from qrisp import QuantumFloat, QuantumVariable, cx, h, measure, x
 from qrisp.jasp import make_jaspr, qache
-from qrisp.jasp.cudaq_interface.cudaq_ingestion.cudaq_prep import (
+from qrisp_cudaq.cudaq_ingestion.cudaq_prep import (
     _CudaqPreparationConfig,
     _prepare_module_for_cudaq,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.jaspr_to_quake import _jaspr_to_quake_mlir
+from qrisp_cudaq.quake_lowering.jaspr_to_quake import to_quake_mlir
 from qrisp.jasp.interpreter_tools import jaspr_to_static_register_jaspr
 
 FUNC_NAME = "__nvqpp__mlirgen__probe"
@@ -52,7 +52,7 @@ def _prepare(circuit_fn, execution_mode="run", register_size=None):
         jaspr = make_jaspr(circuit_fn)()
         if register_size is not None:
             jaspr = jaspr_to_static_register_jaspr(jaspr, register_size)
-        module = _jaspr_to_quake_mlir(jaspr, execution_mode=execution_mode)
+        module = to_quake_mlir(jaspr, execution_mode=execution_mode)
         _prepare_module_for_cudaq(
             module,
             _CudaqPreparationConfig(
@@ -216,7 +216,7 @@ def test_unknown_execution_mode_raises():
     """An unrecognized execution_mode is rejected rather than silently ignored."""
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        module = _jaspr_to_quake_mlir(make_jaspr(_simple)())
+        module = to_quake_mlir(make_jaspr(_simple)())
 
     with pytest.raises(ValueError, match="Unknown execution_mode"):
         _prepare_module_for_cudaq(

@@ -37,7 +37,7 @@ from qrisp import (
     x,
 )
 from qrisp.jasp import q_while_loop, q_cond, qache
-from qrisp.jasp.cudaq_interface import cudaq_kernel, FixedShapeNDArray
+from qrisp_cudaq import cudaq_kernel, FixedShapeNDArray
 from qrisp.operators import X, Y, Z
 
 # ---------------------------------------------------------------------------

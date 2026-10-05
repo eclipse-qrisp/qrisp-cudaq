@@ -28,7 +28,7 @@ from qrisp import (
 )
 from qrisp.block_encodings import BlockEncoding
 from qrisp.jasp import jaspify, terminal_sampling
-from qrisp.jasp.cudaq_interface import cudaq_kernel
+from qrisp_cudaq import cudaq_kernel
 from qrisp.operators import X, Y, Z
 
 # ---------------------------------------------------------------------------

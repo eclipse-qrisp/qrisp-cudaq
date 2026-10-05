@@ -42,9 +42,9 @@ from qrisp.jasp import (
     q_fori_loop,
     q_switch,
 )
-from qrisp.jasp.cudaq_interface import cudaq_kernel
-from qrisp.jasp.cudaq_interface.quake_lowering.jaspr_to_quake import _jaspr_to_quake_mlir
-from qrisp.jasp.cudaq_interface.quake_lowering.validation_tools import _validate_quake_mlir
+from qrisp_cudaq import cudaq_kernel
+from qrisp_cudaq.quake_lowering.jaspr_to_quake import to_quake_mlir
+from qrisp_cudaq.quake_lowering.validation_tools import _validate_quake_mlir
 
 
 # ---------------------------------------------------------------------------
@@ -61,7 +61,7 @@ def _lower(circuit_fn, *trace_args):
     jaspr = make_jaspr(circuit_fn)(*trace_args)
     with warnings.catch_warnings():
         warnings.simplefilter("ignore")
-        xdsl_module = _jaspr_to_quake_mlir(jaspr)
+        xdsl_module = to_quake_mlir(jaspr)
     return xdsl_module
 
 

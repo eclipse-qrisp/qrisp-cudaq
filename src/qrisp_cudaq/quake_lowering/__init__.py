@@ -16,15 +16,15 @@
 
 """Provide lowering passes from Jasp IR to CUDA-Q Quake IR."""
 
-from qrisp.jasp.cudaq_interface.quake_lowering.jaspr_to_quake import _jaspr_to_quake_mlir
-from qrisp.jasp.cudaq_interface.quake_lowering.validation_tools import _validate_quake_mlir
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.quake_dialect import (
+from qrisp_cudaq.quake_lowering.jaspr_to_quake import to_quake_mlir
+from qrisp_cudaq.quake_lowering.validation_tools import _validate_quake_mlir
+from qrisp_cudaq.quake_lowering.dialects.quake_dialect import (
     QuakeDialect,
     QuakeMeasureType,
     QuakeRefType,
     QuakeVeqType,
 )
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.cc_dialect import (
+from qrisp_cudaq.quake_lowering.dialects.cc_dialect import (
     CcDialect,
     CcMeasureHandleType,
     CcSequenceType,

@@ -26,7 +26,7 @@ from cudaq.mlir.dialects import quake as cudaq_quake_dialect
 from cudaq.mlir.ir import Module, NoneType
 from xdsl.dialects.builtin import ModuleOp
 
-from qrisp.jasp.cudaq_interface.cudaq_ingestion.cudaq_prep import (
+from qrisp_cudaq.cudaq_ingestion.cudaq_prep import (
     _CudaqPreparationConfig,
     _prepare_module_for_cudaq,
 )

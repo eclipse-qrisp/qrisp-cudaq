@@ -38,7 +38,7 @@ from xdsl.dialects.builtin import (
 )
 from xdsl.ir import Attribute
 
-from qrisp.jasp.cudaq_interface.quake_lowering.dialects.cc_dialect import CcArrayType, CcPtrType
+from qrisp_cudaq.quake_lowering.dialects.cc_dialect import CcArrayType, CcPtrType
 
 # MLIR's sentinel for "dynamic dimension/offset"
 _MLIR_DYNAMIC = -9223372036854775808
