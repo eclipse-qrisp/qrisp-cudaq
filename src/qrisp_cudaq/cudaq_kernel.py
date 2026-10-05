@@ -55,7 +55,6 @@ from collections.abc import Callable
 from typing import Literal
 
 from cudaq.kernel.kernel_decorator import PyKernelDecorator
-from qrisp.jasp.interpreter_tools import jaspr_to_static_register_jaspr
 from qrisp.jasp.jasp_expression import make_jaspr
 
 from qrisp_cudaq.annotations import FixedShapeNDArray
@@ -247,6 +246,8 @@ def cudaq_kernel(
     jaspr = make_jaspr(func)(*dummy_args)
 
     if register_size is not None and execution_mode == "sample":
+        from qrisp.jasp.interpreter_tools import jaspr_to_static_register_jaspr
+
         new_jaspr = jaspr_to_static_register_jaspr(jaspr, register_size)
     else:
         new_jaspr = jaspr
