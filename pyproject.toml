@@ -1,0 +1,84 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qrisp-cudaq"
+version = "0.1.0"
+authors = [
+    {name = "The Qrisp authors"},
+]
+description = "CUDA-Q backend for Eclipse Qrisp"
+readme = "README.md"
+requires-python = ">=3.11, <3.14"
+classifiers = [
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: Eclipse Public License 2.0 (EPL-2.0)",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: MacOS",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Physics",
+    "Topic :: Scientific/Engineering :: Quantum Computing",
+    "Topic :: Software Development :: Compilers",
+]
+license = {text = "EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0"}
+
+dependencies = [
+    "qrisp[xdsl]>=0.9.9",
+    "cudaq>=0.16.0",
+]
+
+[project.optional-dependencies]
+dev-code-style = [
+    "ruff==0.16.5",
+]
+dev-testing = [
+    "pytest==9.1.1",
+    "pytest-timeout==2.4.0",
+]
+dev = [
+    "qrisp-cudaq[dev-code-style,dev-testing]",
+]
+
+[project.urls]
+Homepage = "https://github.com/eclipse-qrisp/qrisp-cudaq"
+"Bug Tracker" = "https://github.com/eclipse-qrisp/qrisp-cudaq/issues"
+Documentation = "https://www.qrisp.eu"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+exclude = ["__init__.py", "*.ipynb"]
+line-length = 120
+target-version = "py312" # will be changed to consider other python versions as well
+force-exclude = true
+
+
+[tool.ruff.lint]
+select = ["I", "E", "W", "D", "PL", "F"]
+# ruff configuration
+# E, W -- pycodestyle
+# D -- pydocstyle
+# I -- isort
+# PL -- pylint
+# F -- pyflakes
+
+
+ignore = [
+    "D203",  # inconsistent with D211 (no-blank-line-before-class)
+    "D209",  # new-line-after-last-paragraph
+    "D212",  # inconsistent with D213 (multi-line-summary-first-line)
+    "D213",  # inconsistent with D212 (multi-line-summary-first-line)
+    "D400",  # first-line-should-end-with-period
+    "D401",  # first line of docstring should be in imperative mood
+    "D402",  # first-line-should-not-be-signature
+    "D404",  # docstring should start with a proper description (not 'This' or 'A')
+    "D415",  # ends-in-punctuation
+    "D416",  # section-name-should-end-with-colon
+    "PLC0415",  # import not at top of file (lazy/function-level imports to avoid circular imports)
+    "E402",  # module-level import not at top of file (imports after a module docstring)
+]
