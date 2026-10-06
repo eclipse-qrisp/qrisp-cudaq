@@ -18,19 +18,21 @@ Windows is not supported.
 
 ```python
 import cudaq
-from qrisp import QuantumVariable, cx, h, measure
+from qrisp import QuantumFloat, measure
 from qrisp_cudaq import cudaq_kernel
 
 
 @cudaq_kernel
-def bell():
-    qv = QuantumVariable(2)
-    h(qv[0])
-    cx(qv[0], qv[1])
-    return measure(qv)
+def main():
+    a = QuantumFloat(3)
+    b = QuantumFloat(3)
+    a[:] = 3
+    b[:] = 4
+    res = a + b
+    return measure(res)
 
 
-print(cudaq.run(bell, shots_count=100))
+print(cudaq.run(main, shots_count=10))
 ```
 
 ## Documentation
