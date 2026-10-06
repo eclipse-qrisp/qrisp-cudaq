@@ -69,12 +69,15 @@ from qrisp import (
     invert,
 )
 from qrisp.jasp import (
+    jrange,
     make_jaspr,
     qache,
     quantum_kernel,
 )
-from xdsl.dialects.func import FuncOp
+from xdsl.dialects import arith
+from xdsl.dialects.func import CallOp, FuncOp
 
+from qrisp_cudaq.quake_lowering.dialects.cc_dialect import CcLoopOp
 from qrisp_cudaq.quake_lowering.jaspr_to_quake import to_quake_mlir
 from qrisp_cudaq.quake_lowering.validation_tools import _validate_quake_mlir
 from qrisp_cudaq import cudaq_kernel
@@ -1146,6 +1149,29 @@ def test_slice_dynamic_negative_start():
 
     result = cudaq.run(cudaq_kernel(circuit), shots_count=10)
     assert result == 10 * [1023], f"Expected all 10 qubits flipped, got {result}"
+
+
+def test_jrange_increment_in_step_region():
+    """A jrange loop increments its counter in the step region, as native CUDA-Q does.
+
+    With the increment in the body, CUDA-Q's CSE merges it with an ``i + 1``
+    index, and its loop normalization then rewrites that index along with the
+    counter for loops that do not start at 0.
+    """
+
+    def circuit():
+        a = QuantumFloat(3)
+        for i in jrange(1, a.size - 1):
+            cx(a[i], a[i + 1])
+        return measure(a)
+
+    xdsl_module = _lower(circuit)
+
+    loop = next(op for op in xdsl_module.walk() if isinstance(op, CcLoopOp) and "quake.x [" in str(op))
+    body_calls = [op.callee.root_reference.data for op in loop.body_region.walk() if isinstance(op, CallOp)]
+    assert not [name for name in body_calls if name.startswith("_jrange_marker")], "Increment left in the body"
+    assert any(isinstance(op, arith.AddiOp) for op in loop.step_region.walk()), "No increment in the step region"
+    _validate_quake_mlir(str(xdsl_module))
 
 
 # ---------------------------------------------------------------------------

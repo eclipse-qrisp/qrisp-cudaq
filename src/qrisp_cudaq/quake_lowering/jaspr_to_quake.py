@@ -33,6 +33,8 @@
 #    cc.if and cc.loop operations.
 # 3. Scalar tensor unwrapping (scalar_tensor_unwrap) – Fold trivial
 #    rank-0 tensor constants, extracts, and wrappers into scalars.
+# 3a. Loop counters (loop_counter_update_to_step) – Move loop counter
+#     updates into the cc.loop step region, as native CUDA-Q does.
 # 4. Static register allocation (static_veq_alloca) – Rewrite
 #    constant-sized !quake.veq<?> allocations as !quake.veq<N>.
 # 5. Ranked tensor → CC array (ranked_tensor_to_array) – Lower ranked
@@ -52,6 +54,9 @@ from qrisp_cudaq.quake_lowering.lowering_passes.array_to_sequence import (
 )
 from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.jasp_to_quake import (
     _jasp_to_quake,
+)
+from qrisp_cudaq.quake_lowering.lowering_passes.loop_counter_update_to_step import (
+    _move_loop_counter_updates_to_step,
 )
 from qrisp_cudaq.quake_lowering.lowering_passes.ranked_tensor_to_array import (
     _lower_ranked_tensors,
@@ -200,6 +205,7 @@ def to_quake_mlir(jaspr: Jaspr, execution_mode: str = "run") -> ModuleOp:
             ),
             _LoweringPass("scf-to-cc", _lower_scf_to_cc),
             _LoweringPass("scalar-tensor-unwrap", _unwrap_scalar_tensors),
+            _LoweringPass("loop-counter-update-to-step", _move_loop_counter_updates_to_step),
             _LoweringPass("staticize-veq-alloca", _staticize_veq_alloca),
             _LoweringPass("ranked-tensor-to-array", _lower_ranked_tensors),
             _LoweringPass("array-to-sequence", _lower_array_to_sequence),
