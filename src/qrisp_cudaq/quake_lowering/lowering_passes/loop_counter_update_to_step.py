@@ -28,6 +28,12 @@
 # only if the step region can compute it: ``c`` (and the marker's bound) must be
 # a constant, defined outside the loop, or passed on unchanged by the body.
 #
+# This works around a CUDA-Q bug (NVIDIA/cuda-quantum#5561): with the update in
+# the body, CUDA-Q's cse can merge it with an equal value such as an index
+# i + 1, and cc-loop-normalize then rewrites that index along with the counter
+# for loops that do not start at 0, so a[i + 1] addresses a[i]. The pass can be
+# dropped once the minimum supported CUDA-Q version contains a fix.
+#
 # The pass runs after scalar_tensor_unwrap, which turns the 0-d tensor
 # round-trips around these updates into plain i64 arithmetic.
 
