@@ -490,6 +490,51 @@ def test_jrange_with_dynamic_start():
     assert set(cudaq.run(circuit, shots_count=10)) == {2.0}
 
 
+def _runtime_value(value):
+    """Return value as a measurement result, so that it is only known at run time."""
+    k = QuantumFloat(2)
+    for bit in range(2):
+        if value >> bit & 1:
+            x(k[bit])
+    return measure(k).astype(jnp.int64)
+
+
+def test_jrange_with_runtime_bounds():
+    """a[i + 1] addresses the right qubit when both jrange bounds are only known at run time."""
+
+    @cudaq_kernel
+    def circuit():
+        start, stop = _runtime_value(1), _runtime_value(3)
+        a = QuantumFloat(4)
+        a[:] = 12
+        b = QuantumFloat(4)
+        for i in jrange(start, stop):
+            cx(a[i + 1], b[i])
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {6.0}
+
+
+def test_q_fori_loop_with_runtime_bounds():
+    """a[i + 1] addresses the right qubit when both q_fori_loop bounds are only known at run time."""
+
+    @cudaq_kernel
+    def circuit():
+        start, stop = _runtime_value(1), _runtime_value(3)
+        a = QuantumFloat(4)
+        a[:] = 12
+        b = QuantumFloat(4)
+
+        def body(i, val):
+            cx(a[i + 1], b[i])
+            return val
+
+        q_fori_loop(start, stop, body, 0)
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {6.0}
+
+
 def test_q_fori_loop_from_nonzero_start():
     """a[i + 1] addresses the right qubit in a q_fori_loop that does not start at 0."""
 
