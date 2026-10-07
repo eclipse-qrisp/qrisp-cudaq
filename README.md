@@ -18,19 +18,22 @@ Windows is not supported.
 
 ```python
 import cudaq
-from qrisp import QuantumVariable, cx, h, measure
+from qrisp import QuantumFloat, h, measure
 from qrisp_cudaq import cudaq_kernel
 
 
 @cudaq_kernel
-def bell():
-    qv = QuantumVariable(2)
-    h(qv[0])
-    cx(qv[0], qv[1])
-    return measure(qv)
+def main(k: int):
+    a = QuantumFloat(3)
+    h(a)  # a is in superposition of 0, 1, ..., 7
+    b = QuantumFloat(4)
+    b[:] = k
+    b += a  # adds all eight values of a to k at once
+    return measure(a), measure(b)
 
 
-print(cudaq.run(bell, shots_count=100))
+print(cudaq.run(main, 5, shots_count=5))
+# [(1.0, 6.0), (3.0, 8.0), (0.0, 5.0), (4.0, 9.0), (1.0, 6.0)]
 ```
 
 ## Documentation
