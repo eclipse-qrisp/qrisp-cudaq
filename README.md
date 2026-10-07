@@ -33,6 +33,7 @@ def main(k: int):
 
 
 print(cudaq.run(main, 5, shots_count=5))
+# [(1.0, 6.0), (3.0, 8.0), (0.0, 5.0), (4.0, 9.0), (1.0, 6.0)]
 ```
 
 ## Documentation
