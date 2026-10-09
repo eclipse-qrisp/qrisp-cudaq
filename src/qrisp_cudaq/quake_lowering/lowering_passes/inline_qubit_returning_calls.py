@@ -58,15 +58,13 @@ def _inline_qubit_returning_calls(module: ModuleOp) -> None:
     funcs = {op.sym_name.data: op for op in module.body.block.ops if isinstance(op, func.FuncOp)}
     targets = {name for name, func_op in funcs.items() if _returns_qubits(func_op)}
     inlined = set()
-    while True:
-        call = next(
-            (op for op in module.walk() if isinstance(op, func.CallOp) and op.callee.root_reference.data in targets),
-            None,
-        )
-        if call is None:
-            break
-        name = call.callee.root_reference.data
-        _inline_call(call, funcs[name])
-        inlined.add(name)
+    # Inlining can expose calls from the inlined body, hence the repeated walks.
+    while calls := [
+        op for op in module.walk() if isinstance(op, func.CallOp) and op.callee.root_reference.data in targets
+    ]:
+        for call in calls:
+            name = call.callee.root_reference.data
+            _inline_call(call, funcs[name])
+            inlined.add(name)
     for name in inlined:
         module.body.block.erase_op(funcs[name])
