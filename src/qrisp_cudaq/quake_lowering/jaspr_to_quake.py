@@ -29,6 +29,9 @@
 #     that contains linalg.generic operations on ranked tensors before lowering begins.
 # 1. JASP → Quake (jasp_to_quake) – Replace jasp.* operations with
 #    Quake equivalents and eliminate !jasp.QuantumState threading.
+# 1a. Inlining (inline_qubit_returning_calls) – Inline calls to functions
+#     that return qubits, since CUDA-Q releases a function's allocations
+#     when it returns.
 # 2. SCF → CC (scf_to_cc) – Replace structured control flow with
 #    cc.if and cc.loop operations.
 # 3. Scalar tensor unwrapping (scalar_tensor_unwrap) – Fold trivial
@@ -49,6 +52,9 @@ from xdsl.dialects.builtin import ModuleOp
 
 from qrisp_cudaq.quake_lowering.lowering_passes.array_to_sequence import (
     _lower_array_to_sequence,
+)
+from qrisp_cudaq.quake_lowering.lowering_passes.inline_qubit_returning_calls import (
+    _inline_qubit_returning_calls,
 )
 from qrisp_cudaq.quake_lowering.lowering_passes.jasp_to_quake.jasp_to_quake import (
     _jasp_to_quake,
@@ -198,6 +204,7 @@ def to_quake_mlir(jaspr: Jaspr, execution_mode: str = "run") -> ModuleOp:
                 "jasp-to-quake",
                 lambda current_module: _jasp_to_quake(current_module, execution_mode),
             ),
+            _LoweringPass("inline-qubit-returning-calls", _inline_qubit_returning_calls),
             _LoweringPass("scf-to-cc", _lower_scf_to_cc),
             _LoweringPass("scalar-tensor-unwrap", _unwrap_scalar_tensors),
             _LoweringPass("staticize-veq-alloca", _staticize_veq_alloca),
