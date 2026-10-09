@@ -20,12 +20,15 @@ import warnings
 
 import cudaq
 import jax
+import jax.numpy as jnp
 
 from qrisp import (
+    QuantumFloat,
     QuantumVariable,
     QuantumBool,
     h,
     conjugate,
+    cx,
     control,
     invert,
     measure,
@@ -438,3 +441,192 @@ def test_jrange_loop():
 
     results = cudaq.run(circuit, shots_count=10)
     assert results == 10 * [7], f"Expected measurement result to be 7, got {results}"
+
+
+def test_jrange_from_nonzero_start_neighbouring_qubits():
+    """a[i] and a[i + 1] stay distinct qubits in a jrange loop that does not start at 0."""
+
+    @cudaq_kernel
+    def circuit():
+        a = QuantumFloat(3)
+        a[:] = 2
+        for i in jrange(1, a.size - 1):
+            cx(a[i], a[i + 1])
+        return measure(a)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {6.0}
+
+
+def test_jrange_from_nonzero_start_other_register():
+    """a[i + 1] addresses the right qubit in a jrange loop that does not start at 0."""
+
+    @cudaq_kernel
+    def circuit():
+        a = QuantumFloat(3)
+        a[:] = 4
+        b = QuantumFloat(3)
+        for i in jrange(1, 2):
+            cx(a[i + 1], b[i])
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {2.0}
+
+
+def test_jrange_with_dynamic_start():
+    """a[i + 1] addresses the right qubit when the loop start is only known at run time."""
+
+    @cudaq_kernel
+    def circuit():
+        k = QuantumFloat(2)
+        x(k[0])
+        start = measure(k).astype(jnp.int64)
+        a = QuantumFloat(3)
+        a[:] = 4
+        b = QuantumFloat(3)
+        for i in jrange(start, 2):
+            cx(a[i + 1], b[i])
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {2.0}
+
+
+def _runtime_value(value):
+    """Return value as a measurement result, so that it is only known at run time."""
+    k = QuantumFloat(2)
+    for bit in range(2):
+        if value >> bit & 1:
+            x(k[bit])
+    return measure(k).astype(jnp.int64)
+
+
+def test_jrange_with_runtime_bounds():
+    """a[i + 1] addresses the right qubit when both jrange bounds are only known at run time."""
+
+    @cudaq_kernel
+    def circuit():
+        start, stop = _runtime_value(1), _runtime_value(3)
+        a = QuantumFloat(4)
+        a[:] = 12
+        b = QuantumFloat(4)
+        for i in jrange(start, stop):
+            cx(a[i + 1], b[i])
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {6.0}
+
+
+def test_q_fori_loop_with_runtime_bounds():
+    """a[i + 1] addresses the right qubit when both q_fori_loop bounds are only known at run time."""
+
+    @cudaq_kernel
+    def circuit():
+        start, stop = _runtime_value(1), _runtime_value(3)
+        a = QuantumFloat(4)
+        a[:] = 12
+        b = QuantumFloat(4)
+
+        def body(i, val):
+            cx(a[i + 1], b[i])
+            return val
+
+        q_fori_loop(start, stop, body, 0)
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {6.0}
+
+
+def test_q_fori_loop_from_nonzero_start():
+    """a[i + 1] addresses the right qubit in a q_fori_loop that does not start at 0."""
+
+    @cudaq_kernel
+    def circuit():
+        a = QuantumFloat(3)
+        a[:] = 4
+        b = QuantumFloat(3)
+
+        def body(i, val):
+            cx(a[i + 1], b[i])
+            return val
+
+        q_fori_loop(1, 2, body, 0)
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {2.0}
+
+
+def test_q_while_loop_counter_from_nonzero_start():
+    """state + 1 addresses the right qubit in a q_while_loop counting up from 1."""
+
+    @cudaq_kernel
+    def circuit():
+        a = QuantumFloat(3)
+        a[:] = 4
+        b = QuantumFloat(3)
+
+        def body(state):
+            cx(a[state + 1], b[state])
+            return state + 1
+
+        q_while_loop(lambda state: state < 2, body, 1)
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {2.0}
+
+
+def test_q_while_loop_counting_down():
+    """state - 1 addresses the right qubit in a q_while_loop counting down."""
+
+    @cudaq_kernel
+    def circuit():
+        a = QuantumFloat(3)
+        a[:] = 4
+        b = QuantumFloat(3)
+
+        def body(state):
+            cx(a[state], b[state - 1])
+            return state - 1
+
+        q_while_loop(lambda state: state > 1, body, 2)
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {2.0}
+
+
+def test_q_while_loop_step_from_measurement():
+    """A loop whose step is only known inside the body keeps working."""
+
+    @cudaq_kernel
+    def circuit():
+        a = QuantumFloat(3)
+        a[:] = 7
+        b = QuantumFloat(3)
+
+        def body(state):
+            step = measure(a[state]).astype(jnp.int64)
+            cx(a[state], b[state])
+            return state + step
+
+        q_while_loop(lambda state: state < 3, body, 0)
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {7.0}
+
+
+def test_q_while_loop_step_changed_in_body():
+    """A counter whose step the body doubles (an update that stays in the body) visits the right indices."""
+
+    @cudaq_kernel
+    def circuit():
+        a = QuantumFloat(3)
+        a[:] = 7
+        b = QuantumFloat(3)
+
+        def body(carry):
+            state, step = carry
+            cx(a[state], b[state])
+            return state + step, step * 2
+
+        q_while_loop(lambda carry: carry[0] < 3, body, (0, 1))
+        return measure(b)
+
+    assert set(cudaq.run(circuit, shots_count=10)) == {3.0}
