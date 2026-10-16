@@ -1155,7 +1155,10 @@ def test_slice_dynamic_negative_start():
 
 def test_func_call_lowering():
     """
-    Test that a function call to a separate @qache function is correctly lowered.
+    Test that a @qache function returning a newly allocated register is inlined.
+
+    CUDA-Q releases the qubits a function allocates when the function returns,
+    so such a function must not remain a separate function in the output.
     No unsupported jasp types should be present in the output.
     """
 
@@ -1170,10 +1173,12 @@ def test_func_call_lowering():
 
     xdsl_module = _lower(main)
 
+    funcs = [op for op in xdsl_module.body.block.ops if isinstance(op, FuncOp)]
+    returns_quake = [f.sym_name.data for f in funcs if "!quake." in str(f.function_type.outputs)]
+    assert set(returns_quake) <= {"main"}, f"Only the entry function may return a Quake type: {returns_quake}"
     mlir = str(xdsl_module)
-    assert "test" in mlir, "Expected call to 'test' function in output"
-    assert "quake.alloca" in mlir, "Expected quake.alloca in output for test function"
-    assert "quake.veq" in mlir, "Expected quake.veq type in output for test function"
+    assert "func.call @test" not in mlir, "Expected the call to 'test' to be inlined"
+    assert "quake.alloca" in mlir, "Expected the inlined quake.alloca in the output"
     # No jasp types should be present in the output
     _validate_quake_mlir(mlir)
 

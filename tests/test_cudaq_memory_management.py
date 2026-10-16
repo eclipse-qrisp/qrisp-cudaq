@@ -19,7 +19,8 @@
 import pytest
 import cudaq
 
-from qrisp import QuantumFloat, x, reset, measure
+from qrisp import QuantumFloat, cx, x, reset, measure
+from qrisp.jasp import jrange, qache
 from qrisp_cudaq import cudaq_kernel
 
 
@@ -67,3 +68,98 @@ def test_cudaq_memory_management_arithmetic():
         return measure(a)
 
     cudaq.run(main, shots_count=10)
+
+
+@qache
+def _copy_into_new_register(a):
+    s = QuantumFloat(a.size)
+    for i in jrange(a.size):
+        cx(a[i], s[i])
+    return s
+
+
+@qache
+def _copy_and_flip_lowest_bit(a):
+    s = _copy_into_new_register(a)
+    x(s[0])
+    return s
+
+
+@pytest.mark.timeout(30)
+def test_register_returned_from_qached_function():
+    """A register allocated inside a @qache function stays allocated after the function returns."""
+
+    @cudaq_kernel
+    def main():
+        a = QuantumFloat(2)
+        a[:] = 3
+        return measure(_copy_into_new_register(a))
+
+    assert set(cudaq.run(main, shots_count=20)) == {3.0}
+
+
+@pytest.mark.timeout(30)
+def test_register_returned_through_nested_qached_functions():
+    """A register allocated in a nested @qache call survives being returned through both functions."""
+
+    @cudaq_kernel
+    def main():
+        a = QuantumFloat(2)
+        a[:] = 3
+        return measure(_copy_and_flip_lowest_bit(a))
+
+    assert set(cudaq.run(main, shots_count=20)) == {2.0}
+
+
+@pytest.mark.timeout(60)
+def test_quantum_float_multiplication():
+    """QuantumFloat multiplication returns its product register from a @qache function."""
+
+    @cudaq_kernel
+    def main():
+        a = QuantumFloat(2)
+        b = QuantumFloat(2)
+        a[:] = 3
+        b[:] = 2
+        return measure(a * b)
+
+    assert set(cudaq.run(main, shots_count=20)) == {6.0}
+
+
+@qache
+def _new_register_and_passthrough(a, k):
+    s = QuantumFloat(a.size)
+    for i in jrange(a.size):
+        cx(a[i], s[i])
+    return s, k
+
+
+@pytest.mark.timeout(30)
+def test_classical_argument_returned_with_new_register():
+    """A classical argument returned unchanged next to a new register keeps its value."""
+
+    @cudaq_kernel
+    def main(k: int):
+        a = QuantumFloat(2)
+        a[:] = 3
+        s, k_out = _new_register_and_passthrough(a, k)
+        return measure(s) + k_out
+
+    assert set(cudaq.run(main, 5, shots_count=10)) == {8.0}
+
+
+@pytest.mark.timeout(30)
+def test_register_returned_from_qached_function_inside_loop():
+    """A register returned from a @qache function called in a loop body stays allocated."""
+
+    @cudaq_kernel
+    def main():
+        a = QuantumFloat(2)
+        a[:] = 3
+        out = QuantumFloat(2)
+        for i in jrange(2):
+            s = _copy_into_new_register(a)
+            cx(s[i], out[i])
+        return measure(out)
+
+    assert set(cudaq.run(main, shots_count=20)) == {3.0}
