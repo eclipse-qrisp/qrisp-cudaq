@@ -59,6 +59,29 @@ print(cudaq.run(main, 5, shots_count=5))
 # [(1.0, 6.0), (3.0, 8.0), (0.0, 5.0), (4.0, 9.0), (1.0, 6.0)]
 ```
 
+## Troubleshooting
+
+### `LLVM ERROR: Option 'default' already exists!` on import
+
+On Linux, importing `cudaq` and Qrisp in the same process can abort with this
+message. It happens when `numba` and `llvmlite` were installed from conda-forge.
+That build of `llvmlite` loads LLVM as a shared library, which clashes with the
+LLVM inside CUDA-Q
+([NVIDIA/cuda-quantum#2420](https://github.com/NVIDIA/cuda-quantum/issues/2420)).
+Qrisp imports `numba`, so `import cudaq` followed by `import qrisp` is enough to
+trigger it.
+
+The `llvmlite` wheels on PyPI link LLVM statically and do not clash. Replace the
+conda-forge packages with the PyPI wheels of the same versions, so that packages
+depending on them keep working. With `numba` 0.60.0 and `llvmlite` 0.43.0
+installed, that is:
+
+```bash
+conda list | grep -E "numba|llvmlite"  # shows the installed versions
+pip install --force-reinstall --no-deps numba==0.60.0 llvmlite==0.43.0
+python -c "import cudaq, numba"  # aborts before the fix, succeeds after
+```
+
 ## Documentation
 
 The CUDA-Q tutorial and API reference are part of the Qrisp documentation at
