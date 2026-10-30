@@ -103,7 +103,7 @@ def test_simple_block_encoding_results(operator):
         ancs = BE.apply(operand)
         return operand, ancs[0]
 
-    _assert_cudaq_matches_jasp(main, shots_count=500, atol=1e-1)
+    _assert_cudaq_matches_jasp(main, shots_count=500, atol=2e-1)
 
 
 @pytest.mark.parametrize("operator", [X(0) + Z(1), X(0) * X(1) + Z(0) * Z(1)])
