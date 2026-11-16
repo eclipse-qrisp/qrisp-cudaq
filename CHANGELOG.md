@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.0
 
 - Require CUDA-Q 0.17 (`cudaq>=0.17.0,<0.18`); support for CUDA-Q 0.16 is dropped.
 
