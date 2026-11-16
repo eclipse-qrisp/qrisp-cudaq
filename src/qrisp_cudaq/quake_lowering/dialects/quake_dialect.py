@@ -563,18 +563,18 @@ class ResetOp(IRDLOperation):
 
 
 @irdl_op_definition
-class QuakeLogOutputOp(IRDLOperation):
-    """Log a classical value for retrieval by ``cudaq.run``.
+class QuakeEvinceOp(IRDLOperation):
+    """Expose a classical value for retrieval by ``cudaq.run``.
 
     ::
 
-        quake.log_output %val : (i64) -> ()
+        quake.evince %val : (i64) -> ()
 
-    This op records the value for the CUDA-Q runtime to collect across shots.
-    It has no results.
+    In the ``.run`` variant of a kernel, this op records the value for the
+    CUDA-Q runtime to collect across shots. It has no results.
     """
 
-    name = "quake.log_output"
+    name = "quake.evince"
     value = operand_def(AnyAttr())
 
     def __init__(self, value: SSAValue) -> None:
@@ -582,7 +582,7 @@ class QuakeLogOutputOp(IRDLOperation):
         super().__init__(operands=[value])
 
     def print(self, printer: Printer) -> None:
-        """Print the Quake log-output operation."""
+        """Print the Quake evince operation."""
         printer.print_string(" ")
         printer.print_ssa_value(self.value)
         printer.print_string(" : (")
@@ -612,7 +612,7 @@ class QuakeDialect(Dialect):
         MzOp,
         DiscriminateOp,
         ResetOp,
-        QuakeLogOutputOp,
+        QuakeEvinceOp,
         *_ALL_GATE_CLASSES,
     ]
     attributes = [QuakeRefType, QuakeVeqType, QuakeMeasureType, CcSequenceType, CcMeasureHandleType]

@@ -142,7 +142,7 @@ def test_multiple_return_values_are_packed_into_a_struct():
 
 
 def test_run_mode_synthesizes_run_variants():
-    """Run mode adds .run (void, logs outputs) and an empty .run.entry stub."""
+    """Run mode adds .run (void, evinces outputs) and an empty .run.entry stub."""
     funcs = _funcs(_prepare(_simple, "run"))
 
     run_func = funcs[FUNC_NAME + ".run"]
@@ -151,7 +151,7 @@ def test_run_mode_synthesizes_run_variants():
     assert len(run_func.function_type.outputs.data) == 0
     assert "no_this" in run_func.attributes
     assert "quake.cudaq_run" in run_func.attributes
-    assert "quake.log_output" in str(run_func)
+    assert "quake.evince" in str(run_func)
 
     assert len(run_entry.function_type.outputs.data) == 0
     assert "no_this" in run_entry.attributes

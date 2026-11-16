@@ -31,7 +31,7 @@
 # cudaq_prep
 #     Stage 1 -- "Interface Adaptation": restructure the module to match what
 #     CUDA-Q's Module.parse expects (entrypoint renaming/attributes,
-#     .run/.run.entry variants, quake.log_output synthesis, etc.).
+#     .run/.run.entry variants, quake.evince synthesis, etc.).
 # xdsl_ingestion
 #     Stage 2 -- "Re-Compilation": serialize the adapted module, normalize it
 #     from xDSL's to CUDA-Q's MLIR printing conventions, parse it back into
