@@ -28,7 +28,7 @@ license = {text = "EPL-2.0 OR GPL-2.0 WITH Classpath-exception-2.0"}
 
 dependencies = [
     "qrisp[xdsl]>=0.9.10",
-    "cudaq>=0.16.0",
+    "cudaq>=0.17.0,<0.18",
 ]
 
 [project.optional-dependencies]

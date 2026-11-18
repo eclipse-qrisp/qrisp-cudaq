@@ -25,7 +25,7 @@
 # - Strips module sym_name (anonymous module)
 # - Renames @main -> @__nvqpp__mlirgen__<uuid>
 # - Packs multiple return values into !cc.struct
-# - Synthesizes .run variant (quake.log_output + void return)
+# - Synthesizes .run variant (quake.evince + void return)
 # - Synthesizes .run.entry
 # - Injects module-level attributes (quake.mangled_name_map, etc.)
 # - Rejects Quake-valued returns for the .run variant
@@ -50,7 +50,7 @@ from qrisp_cudaq.quake_lowering.dialects.cc_dialect import (
     CcUndefOp,
 )
 from qrisp_cudaq.quake_lowering.dialects.quake_dialect import (
-    QuakeLogOutputOp,
+    QuakeEvinceOp,
     QuakeMeasureType,
     QuakeRefType,
     QuakeVeqType,
@@ -99,17 +99,18 @@ def _set_result_types(func_op: func.FuncOp, result_types: list[Attribute]) -> No
     func_op.properties["function_type"] = FunctionType.from_lists(input_types, result_types)
 
 
-def _rewrite_return_as_log_output(func_op: func.FuncOp) -> None:
-    """Make the function void-returning, logging each value it used to return.
+def _rewrite_return_as_evince(func_op: func.FuncOp) -> None:
+    """Make the function void-returning, evincing each value it used to return.
 
-    ``quake.log_output`` is the mechanism CUDA-Q uses to capture and aggregate
-    per-shot results, so this is how a returned value survives ``cudaq.run``.
+    In a ``.run`` variant, ``quake.evince`` is the mechanism CUDA-Q uses to
+    capture and aggregate per-shot results, so this is how a returned value
+    survives ``cudaq.run``.
     """
     return_op = _find_entry_return(func_op)
     if return_op is not None:
         block = return_op.parent_block()
         for val in list(return_op.operands):
-            block.insert_op_before(QuakeLogOutputOp(val), return_op)
+            block.insert_op_before(QuakeEvinceOp(val), return_op)
         block.insert_op_before(func.ReturnOp(), return_op)
         block.erase_op(return_op)
 
@@ -202,14 +203,14 @@ def _pass_pack_multi_return(func_op: func.FuncOp) -> None:
 
 
 def _pass_synthesize_run(module: ModuleOp, source_func: func.FuncOp, run_func_name: str) -> None:
-    """Create the .run function: clone source, replace return with log_output + void return."""
+    """Create the .run function: clone source, replace return with evince + void return."""
     source_output_types = list(source_func.function_type.outputs.data)
     _validate_run_return_types(source_func)
 
     run_func = source_func.clone()
     run_func.properties["sym_name"] = StringAttr(run_func_name)
 
-    _rewrite_return_as_log_output(run_func)
+    _rewrite_return_as_evince(run_func)
 
     # cudaq-entrypoint / cudaq-kernel and the stripped visibility come along
     # with the clone; only these two are specific to the .run variant.

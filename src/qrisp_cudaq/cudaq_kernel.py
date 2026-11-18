@@ -34,7 +34,7 @@
 #    We restructure the Qrisp-generated MLIR to match what CUDA-Q expects.
 #    Crucially, we also clone the primary entry function to create a required
 #    `.run` variant. During this cloning, we translate standard `func.return`
-#    instructions into `quake.log_output` operations. This structural change
+#    instructions into `quake.evince` operations. This structural change
 #    is required, as it is the exact mechanism CUDA-Q uses to capture and
 #    aggregate individual per-shot measurement data during simulation.
 #

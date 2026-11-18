@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+
+- Require CUDA-Q 0.17 (`cudaq>=0.17.0,<0.18`); support for CUDA-Q 0.16 is dropped.
+
 ## 0.1.0
 
 First release. The CUDA-Q interface moves here from the Qrisp repository.
