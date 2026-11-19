@@ -81,60 +81,24 @@ class GateInfo:
 
 
 def _emit_sx(controls: Sequence[SSAValue], _params: Sequence[SSAValue], targets: Sequence[SSAValue]) -> list[Operation]:
-    """sx(q) = rx(π/2, q), matching Qrisp's ``sx`` (= RX(π/2)) definition exactly."""
-    # Old H·S·H decomposition: only equal to Qrisp's sx up to a global phase
-    # of e^{iπ/4} (Qrisp defines sx as RX(π/2), not H·S·H). Kept here in case
-    # Qrisp's sx definition ever changes away from RX(π/2).
-    #
-    # t = targets[0]
-    # phi_const = arith.ConstantOp(FloatAttr(-math.pi / 4, f64))  # gphase correction
-    # two = arith.ConstantOp(FloatAttr(2.0, f64))
-    # two_phi = arith.MulfOp(two.result, phi_const.result)
-    # neg_two_phi = arith.NegfOp(two_phi.result)
-    # return [
-    #     make_gate_op("h", [], [], [t]),
-    #     make_gate_op("s", controls, [], [t]),
-    #     make_gate_op("h", [], [], [t]),
-    #     phi_const, two, two_phi, neg_two_phi,
-    #     make_gate_op("rz", [], [neg_two_phi], [t]),
-    #     make_gate_op("p", [], [two_phi], [t]),
-    # ]
-
+    """Decomposed implementation of sx (H·S·H)."""
     t = targets[0]
-    angle = arith.ConstantOp(FloatAttr(math.pi / 2, f64))
     return [
-        angle,
-        _make_gate_op("rx", controls, [angle.result], [t]),
+        _make_gate_op("h", [], [], [t]),
+        _make_gate_op("s", controls, [], [t]),
+        _make_gate_op("h", [], [], [t]),
     ]
 
 
 def _emit_sx_dg(
     controls: Sequence[SSAValue], _params: Sequence[SSAValue], targets: Sequence[SSAValue]
 ) -> list[Operation]:
-    """sx†(q) = rx(-π/2, q), matching Qrisp's ``sx_dg`` (= RX(-π/2)) definition exactly."""
-    # Old H·S†·H decomposition: only equal to Qrisp's sx_dg up to a global
-    # phase of e^{-iπ/4} (Qrisp defines sx_dg as RX(-π/2), not H·S†·H). Kept
-    # here in case Qrisp's sx_dg definition ever changes away from RX(-π/2).
-    #
-    # t = targets[0]
-    # phi_const = arith.ConstantOp(FloatAttr(math.pi / 4, f64))  # gphase correction
-    # two = arith.ConstantOp(FloatAttr(2.0, f64))
-    # two_phi = arith.MulfOp(two.result, phi_const.result)
-    # neg_two_phi = arith.NegfOp(two_phi.result)
-    # return [
-    #     make_gate_op("h", [], [], [t]),
-    #     make_gate_op("s_dg", controls, [], [t]),
-    #     make_gate_op("h", [], [], [t]),
-    #     phi_const, two, two_phi, neg_two_phi,
-    #     make_gate_op("rz", [], [neg_two_phi], [t]),
-    #     make_gate_op("p", [], [two_phi], [t]),
-    # ]
-
+    """Decomposed implementation of sx† (H·S†·H)."""
     t = targets[0]
-    angle = arith.ConstantOp(FloatAttr(-math.pi / 2, f64))
     return [
-        angle,
-        _make_gate_op("rx", controls, [angle.result], [t]),
+        _make_gate_op("h", [], [], [t]),
+        _make_gate_op("s_dg", controls, [], [t]),
+        _make_gate_op("h", [], [], [t]),
     ]
 
 

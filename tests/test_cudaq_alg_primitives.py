@@ -231,7 +231,7 @@ def test_iterative_quantum_phase_estimation():
         return IQPE(qv, U, precision=4)
 
     results = cudaq.run(main, shots_count=10)
-    expected = 1 / 2**3 + 1 / 2**2
+    expected = (1 / 2) * (1 / 2**3 + 1 / 2**2)
     assert np.allclose(results, expected)
 
 
