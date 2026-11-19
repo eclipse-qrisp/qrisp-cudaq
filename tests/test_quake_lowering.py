@@ -559,7 +559,7 @@ def test_single_qubit_gates():
 
 
 def test_decomposed_gates_sx():
-    """sx / sx_dg lower to quake.rx(±π/2), matching Qrisp's RX(±π/2) definition."""
+    """sx / sx_dg lower to quake.h, quake.s sequence (H·S·H and H·S†·H)."""
 
     def circuit():
         qv = QuantumVariable(2)
@@ -571,9 +571,8 @@ def test_decomposed_gates_sx():
     xdsl_module = _lower(circuit)
 
     mlir = str(xdsl_module)
-    assert "quake.rx" in mlir, "Expected quake.rx in output for sx/sx_dg"
-    assert "1.5707963267948966" in mlir, "Expected a pi/2 constant angle in output"
-    assert "-1.5707963267948966" in mlir, "Expected a -pi/2 constant angle in output for sx_dg"
+    assert "quake.h" in mlir, "Expected quake.h in output for sx/sx_dg"
+    assert "quake.s" in mlir, "Expected quake.s in output for sx/sx_dg"
     _validate_quake_mlir(mlir)
 
 
